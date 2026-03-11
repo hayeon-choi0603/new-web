@@ -91,47 +91,78 @@ function animLoop() {
   })();
 }
 
-// ── 방명록 ──
-let entries = [];
-try { entries = JSON.parse(localStorage.getItem('gb-entries') || '[]'); } catch (e) {}
+// ── Supabase 방명록 ──
+const SUPABASE_URL = 'https://lcfqamcjxhmvzqkgeedv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxjZnFhbWNqeGhtdnpxa2dlZWR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMTI2MDUsImV4cCI6MjA4ODc4ODYwNX0.awnO-H712vA8r6pziH_N2VIcOYujw4GawxB0iDduQ0w';
+
+const headers = {
+  'Content-Type': 'application/json',
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`
+};
 
 function esc(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function renderEntries() {
+async function loadEntries() {
   const el = document.getElementById('entries');
-  if (entries.length === 0) {
-    el.innerHTML = '<div class="empty-msg">아직 아무도 안 남겼다... 첫 번째가 돼봐 👀</div>';
-    return;
+  el.innerHTML = '<div class="empty-msg">불러오는 중... ⏳</div>';
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/guestbook?order=id.desc`, { headers });
+    const data = await res.json();
+    if (!data.length) {
+      el.innerHTML = '<div class="empty-msg">아직 아무도 안 남겼습니다. 첫 번째가 돼어보세요! 👀</div>';
+      return;
+    }
+    el.innerHTML = '';
+    data.forEach(e => {
+      const card = document.createElement('div');
+      card.className = 'entry-card';
+      card.innerHTML = `
+        <div class="entry-header">
+          <span class="entry-name">${esc(e.name)}</span>
+          <span class="entry-date">${e.date}</span>
+        </div>
+        <div class="entry-msg">${esc(e.msg)}</div>`;
+      el.appendChild(card);
+    });
+  } catch(e) {
+    el.innerHTML = '<div class="empty-msg">불러오기 실패 😢 새로고침 해봐요</div>';
   }
-  el.innerHTML = '';
-  [...entries].reverse().forEach(e => {
-    const card = document.createElement('div');
-    card.className = 'entry-card';
-    card.innerHTML = `
-      <div class="entry-header">
-        <span class="entry-name">${esc(e.name)}</span>
-        <span class="entry-date">${e.date}</span>
-      </div>
-      <div class="entry-msg">${esc(e.msg)}</div>`;
-    el.appendChild(card);
-  });
 }
 
-function submitEntry() {
+async function submitEntry() {
   const name = document.getElementById('g-name').value.trim();
   const msg  = document.getElementById('g-msg').value.trim();
   if (!name || !msg) { alert('이름이랑 메시지 둘 다 써줘!'); return; }
-  entries.push({
-    name, msg,
-    date: new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-  });
-  try { localStorage.setItem('gb-entries', JSON.stringify(entries)); } catch (e) {}
-  document.getElementById('g-name').value = '';
-  document.getElementById('g-msg').value  = '';
-  renderEntries();
-  launchFireworks();
+
+  const date = new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  const btn = document.querySelector('.submit-btn');
+  btn.textContent = '저장 중...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/guestbook`, {
+      method: 'POST',
+      headers: { ...headers, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ name, msg, date })
+    });
+    if (res.ok) {
+      document.getElementById('g-name').value = '';
+      document.getElementById('g-msg').value  = '';
+      await loadEntries();
+      launchFireworks();
+    } else {
+      alert('저장 실패 😢 다시 시도해봐요!');
+    }
+  } catch(e) {
+    alert('오류 발생 😢 인터넷 연결 확인해봐요');
+  } finally {
+    btn.textContent = '남기기 💬';
+    btn.disabled = false;
+  }
 }
 
-renderEntries();
+loadEntries();
