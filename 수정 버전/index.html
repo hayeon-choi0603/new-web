@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제 첫 웹사이트에 오신 것을 환영합니다.</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<canvas id="fireworks-canvas"></canvas>
+
+<section class="hero">
+  <div class="badge">🎉 FIRST WEBSITE EVER</div>
+  <h1>나 드디어<br><span class="hl">웹사이트</span><br>만들었다!!!</h1>
+  <p class="sub">나 드디어! 웹사이트 만들었다!!</p>
+
+
+
+  <div class="counter-section">
+    <div class="counter-box"><div class="num" id="cnt-d">0</div><div class="lbl">D+</div></div>
+    <div class="counter-box"><div class="num" id="cnt-h">00</div><div class="lbl">시간</div></div>
+    <div class="counter-box"><div class="num" id="cnt-m">00</div><div class="lbl">분</div></div>
+    <div class="counter-box"><div class="num" id="cnt-s">00</div><div class="lbl">초</div></div>
+  </div>
+
+  <button class="celebrate-btn" onclick="launchFireworks()">🎆 축하해줘!!!</button>
+</section>
+
+<section class="guestbook">
+  <h2 class="sec-title">방명록 <span>남겨주세용</span> 👀</h2>
+  <div class="gb-form">
+    <input type="text" id="g-name" placeholder="이름 (예: 닉네임)" maxlength="20">
+    <textarea id="g-msg" placeholder="(예: 축하해요)" maxlength="200"></textarea>
+  <button class="submit-btn" onclick="submitEntry()">남기기 💬</button>
+  </div>
+  <div class="entries" id="entries">
+    <div class="empty-msg">아직 아무도 안 남겼습니다.첫 번째가 돼어보세요! 👀</div>
+  </div>
+</section>
+
+<footer>
+  이 웹사이트는 <strong>수많은 오류</strong>와 <strong>저의 피땀 눈물 끝에 </strong> 끝에 탄생했습니다 <br>
+  만든 날: <strong id="made-date"></strong>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
